@@ -114,10 +114,6 @@ export class GenericProcessoWorker extends WorkerHost {
       // --------------------------
       // 🔍 Buscar processo
       // --------------------------
-      if (regionTRT === 3) {
-        await this.scrapingService.execute(numero, regionTRT, 1);
-      }
-      // return;
       const instances = await this.fetchUrlMovimentService.execute(
         numero,
         origem,
