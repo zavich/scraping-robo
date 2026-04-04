@@ -244,15 +244,15 @@ export class ProcessDocumentsFindService {
           const fileName = `${bookmark.title.replace(/\s+/g, '_')}_${bookmark.index}_${Date.now()}_${Math.random()
             .toString(36)
             .slice(2, 8)}.pdf`;
-
-          const url = await this.awsS3Service.uploadPdf(
-            extractedPdfBuffer,
+          await this.awsS3Service.uploadS3Object(
+            process.env.AWS_S3_BUCKET_NAME as string,
             fileName,
+            extractedPdfBuffer,
+            'application/pdf',
           );
-
           uploadedDocuments.push({
             title: bookmark.title,
-            temp_link: url,
+            temp_link: fileName,
             uniqueName: bookmark.id,
             date: bookmark.data ?? '',
           });
