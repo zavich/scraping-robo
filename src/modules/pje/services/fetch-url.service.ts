@@ -93,6 +93,12 @@ export class FetchUrlMovimentService {
             regionTRT,
           );
 
+          this.logger.debug(
+            `Enviando requisição para instância ${i} com headers: ${JSON.stringify(
+              headers,
+            )}`,
+          );
+
           const { data } = await axios.get<DetalheProcesso[]>(
             `https://pje.trt${regionTRT}.jus.br/pje-consulta-api/api/processos/dadosbasicos/${numeroDoProcesso}`,
             { headers: await headers },
@@ -130,6 +136,9 @@ export class FetchUrlMovimentService {
             this.logger.error(
               `Erro ao buscar instância ${i} para o processo ${numeroDoProcesso}: ${err.message}`,
             );
+            this.logger.debug(
+              `Detalhes do erro: ${JSON.stringify(err.response?.data || err)}`,
+            );
             break;
           }
           this.logger.warn(
@@ -144,8 +153,10 @@ export class FetchUrlMovimentService {
       this.logger.error(`Erro ao buscar processo ${numeroDoProcesso}`, error);
       if ([401, 403].includes(error?.response?.status)) {
         this.logger.warn(
-          `Sessão expirada no TRT-${regionTRT}, refazendo login...`,
+          `Sessão expirada ou bloqueada no TRT-${regionTRT}, refazendo login...`,
         );
+        // Adiciona lógica para refazer login ou atualizar tokens
+        await this.redis.del(`aws-waf-token:${numeroDoProcesso}`);
         return this.execute(numeroDoProcesso, origem); // reprocessa com novo login
       }
       return [];
