@@ -3,9 +3,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import Redis from 'ioredis';
-import { DetalheProcesso, ProcessosResponse } from 'src/interfaces';
+import { ProcessosResponse } from 'src/interfaces';
 import { CaptchaService } from 'src/services/captcha.service';
 import { userAgents } from 'src/utils/user-agents';
+import { NewScrapingService } from './scraping.service';
 
 @Injectable()
 export class FetchUrlMovimentService {
@@ -14,6 +15,7 @@ export class FetchUrlMovimentService {
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly newScrapingService: NewScrapingService,
   ) {}
 
   private async delay(ms: number) {
@@ -82,56 +84,15 @@ export class FetchUrlMovimentService {
             `⏱ Delay de ${delayMs}ms antes de buscar a ${i}ª instância`,
           );
           await this.delay(delayMs);
-
-          const tokenCaptcha = (await this.redis.get(
-            `pje:token:captcha:${numeroDoProcesso}:${i}`,
-          )) as string;
-
-          const headers = await this.buildHeaders(
-            numeroDoProcesso,
-            i.toString(),
-            regionTRT,
-          );
-          console.log(`Headers para instância ${i}:`, headers);
-
-          this.logger.debug(
-            `Enviando requisição para instância ${i} com headers: ${JSON.stringify(
-              headers,
-            )}`,
-          );
-
-          const { data } = await axios.get<DetalheProcesso[]>(
-            `https://pje.trt${regionTRT}.jus.br/pje-consulta-api/api/processos/dadosbasicos/${numeroDoProcesso}`,
-            { headers: await headers },
-          );
-
-          const detalheProcesso = data[0];
-          if (!detalheProcesso) continue;
-
-          let processoResponse = await this.fetchProcess(
-            numeroDoProcesso,
-            detalheProcesso.id,
-            i.toString(),
-            tokenCaptcha,
-          );
-
-          // Caso retorne captcha
-          if (
-            'imagem' in processoResponse &&
-            'tokenDesafio' in processoResponse
-          ) {
-            const resposta = await this.fetchCaptcha(processoResponse.imagem);
-            processoResponse = await this.fetchProcess(
+          const { data: processoResponse, multipleInstances } =
+            await this.newScrapingService.execute(
               numeroDoProcesso,
-              detalheProcesso.id,
-              i.toString(),
-              undefined,
-              processoResponse.tokenDesafio,
-              resposta,
+              regionTRT,
+              i,
             );
-          }
 
           instances.push(processoResponse);
+          if (!multipleInstances) break;
         } catch (err: any) {
           if (i === 1) {
             this.logger.error(
