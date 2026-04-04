@@ -87,11 +87,12 @@ export class FetchUrlMovimentService {
             `pje:token:captcha:${numeroDoProcesso}:${i}`,
           )) as string;
 
-          const headers = this.buildHeaders(
+          const headers = await this.buildHeaders(
             numeroDoProcesso,
             i.toString(),
             regionTRT,
           );
+          console.log(`Headers para instância ${i}:`, headers);
 
           this.logger.debug(
             `Enviando requisição para instância ${i} com headers: ${JSON.stringify(
