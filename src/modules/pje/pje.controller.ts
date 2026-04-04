@@ -100,7 +100,7 @@ export class PjeController {
   }
   @Post('/auth/login')
   async loginPje(): Promise<any> {
-    return await this.loginPoolService.getCookies(1);
+    return await this.loginPoolService.getCookies(15);
   }
   @Post('/teste/trt')
   async teste(): Promise<any> {

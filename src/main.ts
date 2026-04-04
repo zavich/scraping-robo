@@ -11,7 +11,10 @@ async function bootstrap() {
   const port = process.env.PORT || 8081;
 
   app.enableCors({
-    origin: ['https://api.analisesprosolutti.com'],
+    origin: [
+      'https://robo-api-production.up.railway.app',
+      'http://localhost:8080',
+    ],
     credentials: true,
   });
 

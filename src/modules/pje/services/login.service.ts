@@ -40,7 +40,7 @@ export class PjeLoginService {
     const { context, page } = await BrowserManager.createPage();
 
     try {
-      const loginUrl = `https://pje.trt${regionTRT}.jus.br/consultaprocessual/login`;
+      const loginUrl = `https://pje.trt${regionTRT}.jus.br/consultaprocessual`;
 
       const randomUA =
         userAgents[Math.floor(Math.random() * userAgents.length)];
@@ -48,6 +48,29 @@ export class PjeLoginService {
 
       this.logger.debug(`Acessando página inicial do TRT-${regionTRT}...`);
       await page.goto(loginUrl, { waitUntil: 'networkidle0' });
+
+      // Verifica se a página inicial foi carregada corretamente
+      const initialPageContent = await page.content();
+      if (initialPageContent.includes('Sistema temporariamente indisponível')) {
+        this.logger.error(
+          'Erro ao acessar a página inicial: Sistema temporariamente indisponível.',
+        );
+        throw new ServiceUnavailableException(
+          'Erro ao acessar a página inicial: Sistema temporariamente indisponível.',
+        );
+      }
+
+      // Localiza e clica no botão de "Acesso restrito"
+      const accessButtonSelector =
+        'a[routerlink="/login"][mattooltip="Acesso restrito"]';
+      await page.waitForSelector(accessButtonSelector, { visible: true });
+      this.logger.debug('Botão "Acesso restrito" localizado.');
+      await page.click(accessButtonSelector);
+
+      // Aguarda a navegação para a página de login
+      await page.waitForSelector('#usuarioField', { timeout: 15000 });
+      this.logger.debug('🟢 Tela de login carregada!');
+
       await page
         .waitForFunction(
           () => {
@@ -343,15 +366,29 @@ export class PjeLoginService {
 
       this.logger.log('🟢 AWS WAF removido! Prosseguindo com o login...');
       await new Promise((resolve) => setTimeout(resolve, 800));
-      await page.waitForSelector('input[name="usuario"]', { visible: true });
-      await page.type('input[name="usuario"]', username);
-      await page.type('input[name="senha"]', password);
+      // Verifica e insere os valores nos campos de usuário e senha
+      const usernameSelector = '#usuarioField';
+      const passwordSelector = '#senhaField';
 
+      this.logger.debug('Verificando campo de usuário...');
+      await page.waitForSelector(usernameSelector, { visible: true });
+      this.logger.debug('Campo de usuário localizado. Inserindo valor...');
+      await page.click(usernameSelector);
+      await page.type(usernameSelector, username);
+
+      this.logger.debug('Verificando campo de senha...');
+      await page.waitForSelector(passwordSelector, { visible: true });
+      this.logger.debug('Campo de senha localizado. Inserindo valor...');
+      await page.click(passwordSelector);
+      await page.type(passwordSelector, password);
+
+      this.logger.debug('Clicando no botão de login...');
       await Promise.all([
         page.waitForNavigation({ waitUntil: 'networkidle0' }),
         page.click('#btnEntrar'),
       ]);
 
+      // Verifica se o login foi bem-sucedido ou se houve algum problema
       const finalUrl = page.url();
       const html = await page.content();
 
@@ -359,7 +396,12 @@ export class PjeLoginService {
         finalUrl.includes('login') ||
         html.includes('Usuário ou senha inválidos')
       ) {
-        throw new ServiceUnavailableException('Credenciais inválidas.');
+        this.logger.error(
+          'Erro ao realizar login: Credenciais inválidas ou problema no site.',
+        );
+        throw new ServiceUnavailableException(
+          'Erro ao realizar login: Credenciais inválidas ou problema no site.',
+        );
       }
 
       const cookies = await page.cookies();
