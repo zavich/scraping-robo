@@ -302,19 +302,6 @@ export class ProcessDocumentsFindService {
         `Não foi possível baixar documentos restritos para o processo ${processNumber}`,
       );
     }
-    const captchaKey = `pje:token:captcha:${processNumber}`;
-    const keys = await this.redis.keys(`${captchaKey}*`);
-
-    if (keys.length) {
-      const deleted = await this.redis.del(...keys);
-      this.logger.debug(
-        `🧹 ${deleted} tokenCaptcha(s) removidos para ${processNumber}`,
-      );
-    } else {
-      this.logger.warn(
-        `⚠️ Nenhum tokenCaptcha encontrado para ${processNumber}`,
-      );
-    }
 
     return uploadedDocuments;
   }
