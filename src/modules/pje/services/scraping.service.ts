@@ -279,13 +279,13 @@ export class NewScrapingService {
         //
         // 6. RECARREGAR PARA VALIDAR O TOKEN
         //
-        const originalCookies = await page.cookies();
-        await this.redis.set(
-          `aws-waf-token:${regionTRT}`,
-          originalCookies.map((c) => `${c.name}=${c.value}`).join('; '),
-          'EX',
-          3600,
-        );
+        // const originalCookies = await page.cookies();
+        // await this.redis.set(
+        //   `aws-waf-token:${regionTRT}`,
+        //   originalCookies.map((c) => `${c.name}=${c.value}`).join('; '),
+        //   'EX',
+        //   3600,
+        // );
         await new Promise((r) => setTimeout(r, 1500));
         await page.reload({ waitUntil: 'domcontentloaded' });
       }
