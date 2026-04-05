@@ -63,12 +63,17 @@ export class BrowserManager {
    * Cria uma nova página dentro de um contexto reutilizável.
    */
   static async createPage(): Promise<{ context: BrowserContext; page: Page }> {
-    const context = await this.getContext();
+    const browser = await this.getBrowser();
+
+    // 🔥 NOVO: cria contexto isolado SEMPRE
+    const context = await browser.createBrowserContext();
+
     const page = await context.newPage();
 
     await page.setRequestInterception(true);
     page.on('request', (req) => {
-      if (req.resourceType() === 'image') {
+      const blocked = ['image', 'font', 'media'];
+      if (blocked.includes(req.resourceType())) {
         req.abort().catch(() => {});
       } else {
         req.continue().catch(() => {});
@@ -82,7 +87,8 @@ export class BrowserManager {
    * Fecha página e devolve o contexto ao pool.
    */
   static async closeContext(context: BrowserContext): Promise<void> {
-    await Promise.resolve(); // Adicionado para evitar erro de lint
-    this.releaseContext(context);
+    try {
+      await context.close(); // 🔥 mata o contexto
+    } catch {}
   }
 }
