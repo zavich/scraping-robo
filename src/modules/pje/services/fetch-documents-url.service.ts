@@ -52,6 +52,10 @@ export class FetchDocumentoService {
         // responseType: 'arraybuffer',
         withCredentials: true,
       });
+      console.log(
+        'Resposta do servidor ao baixar PDF:',
+        JSON.stringify(response.data),
+      );
 
       if (!response.data || response.data.length === 0) {
         throw new Error('Resposta vazia ao baixar PDF');

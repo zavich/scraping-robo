@@ -592,13 +592,7 @@ export class NewScrapingService {
 
       return { data: extractedData, multipleInstances };
     } finally {
-      try {
-        if (!context.closed) {
-          BrowserManager.closeContext(context);
-        }
-      } catch (err) {
-        this.logger.warn('⚠️ Erro ao fechar contexto:', err);
-      }
+      await BrowserManager.closeContext(context);
     }
   }
   private async detectBlock(page: Page): Promise<void> {
