@@ -27,6 +27,7 @@ export class BrowserManager {
           '--disable-gpu',
           '--no-zygote',
           '--disable-software-rasterizer',
+          '--single-process',
         ],
         protocolTimeout: 300000,
         timeout: 300000,
