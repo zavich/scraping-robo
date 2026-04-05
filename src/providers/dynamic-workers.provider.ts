@@ -4,7 +4,7 @@ import { ALL_TRT_QUEUES } from 'src/helpers/getTRTQueue';
 import { GenericProcessoWorker } from '../modules/pje/queues/wokers/processos-trt.worker';
 const DEFAULT_CONCURRENCY = 2;
 const SPECIAL_CONCURRENCY = 1;
-const LOCK_DURATION = 120_000;
+const LOCK_DURATION = 300_000;
 export function createDynamicWorkers(): Provider[] {
   const queues = [...ALL_TRT_QUEUES, 'pje-tst'];
 
@@ -14,6 +14,10 @@ export function createDynamicWorkers(): Provider[] {
         queueName === 'pje-documentos-trt3'
           ? SPECIAL_CONCURRENCY
           : DEFAULT_CONCURRENCY,
+      limiter: {
+        max: 1,
+        duration: 3000, // 1 request a cada 3s
+      },
       lockDuration: LOCK_DURATION,
     };
 
