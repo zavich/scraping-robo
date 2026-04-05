@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
+import { Page } from 'puppeteer';
 import { ProcessosResponse } from 'src/interfaces';
 import { CaptchaService } from 'src/services/captcha.service';
 import { BrowserManager } from 'src/utils/browser.manager';
@@ -282,6 +283,10 @@ export class NewScrapingService {
         await page.reload({ waitUntil: 'networkidle0' });
         this.logger.log('🔁 Página recarregada — AWS WAF liberado!');
       }
+      await this.detectBlock(page).catch((err) => {
+        this.logger.error('⚠️ Detecção de bloqueio falhou:', err);
+      });
+
       // Substitui a espera direta pelo retry para o inputSelector
       this.logger.log(
         '🔍 Identificando campo de entrada do número do processo...',
@@ -564,7 +569,23 @@ export class NewScrapingService {
       await BrowserManager.closeContext(context);
     }
   }
+  private async detectBlock(page: Page): Promise<void> {
+    const html = await page.content();
 
+    if (
+      html.includes('awswaf') ||
+      html.includes('captcha') ||
+      html.includes('Access Denied')
+    ) {
+      throw new Error('🚫 BLOQUEADO (WAF/CAPTCHA)');
+    }
+
+    const hasInput = await page.$('#nrProcessoInput');
+
+    if (!hasInput) {
+      throw new Error('🚫 PÁGINA NÃO CARREGOU CORRETAMENTE');
+    }
+  }
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
