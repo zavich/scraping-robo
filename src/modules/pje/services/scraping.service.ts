@@ -19,7 +19,10 @@ export class NewScrapingService {
     try {
       const urlBase = `https://pje.trt${regionTRT}.jus.br/consultaprocessual/`;
       this.logger.log(`🌐 Acessando URL base: ${urlBase}`);
-
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+          '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      );
       await page.goto(urlBase, { waitUntil: 'networkidle0' });
       await page
         .waitForFunction(
@@ -280,11 +283,30 @@ export class NewScrapingService {
           3600,
         );
         await new Promise((r) => setTimeout(r, 1500));
-        await page.reload({ waitUntil: 'networkidle0' });
-        this.logger.log('🔁 Página recarregada — AWS WAF liberado!');
+        await page.reload({ waitUntil: 'domcontentloaded' });
       }
-      await this.detectBlock(page).catch((err) => {
-        this.logger.error('⚠️ Detecção de bloqueio falhou:', err);
+      // 🔥 ESPERA REAL DO FRONT
+      await page.waitForFunction(
+        () => {
+          return document.readyState === 'complete';
+        },
+        { timeout: 10000 },
+      );
+
+      // 🔥 AGUARDA JS DO PJE RENDERIZAR
+      await new Promise((r) => setTimeout(r, 3000));
+
+      this.logger.log(
+        '🔁 Página recarregada — aguardando renderização real...',
+      );
+      await this.detectBlock(page);
+      this.logger.log('📄 HTML parcial:');
+      console.log((await page.content()).slice(0, 1000));
+      this.logger.log('📍 URL atual:', page.url());
+      page.on('response', (res) => {
+        if (res.status() === 403) {
+          console.log('🚫 403 detectado:', res.url());
+        }
       });
 
       // Substitui a espera direta pelo retry para o inputSelector
@@ -571,21 +593,25 @@ export class NewScrapingService {
   }
   private async detectBlock(page: Page): Promise<void> {
     const html = await page.content();
+    const url = page.url();
 
     if (
       html.includes('awswaf') ||
-      html.includes('captcha') ||
-      html.includes('Access Denied')
+      html.includes('Access Denied') ||
+      url.includes('error') ||
+      url.includes('blocked')
     ) {
-      throw new Error('🚫 BLOQUEADO (WAF/CAPTCHA)');
+      throw new Error('🚫 BLOQUEADO (WAF)');
     }
 
-    const hasInput = await page.$('#nrProcessoInput');
+    // 🔥 verifica se o body está vazio ou estranho
+    const bodyLength = html.length;
 
-    if (!hasInput) {
-      throw new Error('🚫 PÁGINA NÃO CARREGOU CORRETAMENTE');
+    if (bodyLength < 5000) {
+      throw new Error('🚫 HTML suspeito (provável bloqueio)');
     }
   }
+
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
