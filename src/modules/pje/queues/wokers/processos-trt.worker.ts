@@ -173,6 +173,8 @@ export class GenericProcessoWorker extends WorkerHost {
       );
 
       if (erroMensagem) {
+        console.log('ERROR:', erroMensagem);
+
         this.logger.warn(
           `⚠️ Mensagem de erro para o processo ${numero}: ${erroMensagem.mensagemErro}`,
         );
@@ -251,6 +253,10 @@ export class GenericProcessoWorker extends WorkerHost {
       await axios.post(webhookUrl, response);
     } catch (error) {
       this.logger.error(error);
+      this.logger.error(
+        `❌ [${job.queueName}] Erro ao processar ${numero}`,
+        error,
+      );
 
       if (axios.isAxiosError(error) && error.status === 503) {
         const response = normalizeResponse(

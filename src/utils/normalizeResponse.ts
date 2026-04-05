@@ -1,11 +1,6 @@
 import { ItensProcesso, Partes, Polo, ProcessosResponse } from 'src/interfaces';
 import { Root } from 'src/interfaces/normalize';
 
-type Assunto = {
-  principal: boolean;
-  descricao: string;
-};
-
 export function normalizeResponse(
   numero: string,
   body: ProcessosResponse[],

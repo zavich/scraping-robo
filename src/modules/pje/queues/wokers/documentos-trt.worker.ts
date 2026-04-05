@@ -31,6 +31,7 @@ export class GenericDocumentosWorker extends WorkerHost {
       const regionTRT = match ? Number(match[1]) : null;
 
       if (!regionTRT) {
+        this.logger.warn(`⚠️ Número inválido ${numero}`);
         const resp = normalizeResponse(
           numero,
           [],
@@ -46,6 +47,9 @@ export class GenericDocumentosWorker extends WorkerHost {
 
       // Se não tiver cookies, significa que nenhuma conta está disponível
       if (!cookies || !account) {
+        this.logger.warn(
+          `⚠️ TRT-${regionTRT} indisponível ou todas as contas bloqueadas`,
+        );
         const resp = normalizeResponse(
           numero,
           [],
