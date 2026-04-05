@@ -14,7 +14,7 @@ export class NewScrapingService {
   ) {}
 
   async execute(processNumber: string, regionTRT: number, instance: number) {
-    const { page, context } = await BrowserManager.createPage();
+    const { page } = await BrowserManager.createPage();
 
     const urlBase = `https://pje.trt${regionTRT}.jus.br/consultaprocessual/`;
     this.logger.log(`🌐 Acessando URL base: ${urlBase}`);
@@ -549,8 +549,6 @@ export class NewScrapingService {
     });
 
     // Finaliza a extensão (fecha a página e o contexto do navegador)
-    await page.close();
-    await BrowserManager.closeContext(context);
 
     return { data: extractedData, multipleInstances };
   }
