@@ -390,7 +390,13 @@ export class PjeLoginService {
 
       return { cookies: cookieString };
     } finally {
-      await BrowserManager.closeContext(context);
+      try {
+        if (!context.closed) {
+          BrowserManager.closeContext(context);
+        }
+      } catch (err) {
+        this.logger.warn('⚠️ Erro ao fechar contexto:', err);
+      }
     }
   }
 }
