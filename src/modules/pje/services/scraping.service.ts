@@ -17,6 +17,10 @@ export class NewScrapingService {
   async execute(processNumber: string, regionTRT: number, instance: number) {
     const { page, context } = await BrowserManager.createPage();
     try {
+      if (!page || !context) {
+        this.logger.error('❌ Falha ao criar o contexto ou a página.');
+        throw new Error('Falha ao criar o contexto ou a página.');
+      }
       const urlBase = `https://pje.trt${regionTRT}.jus.br/consultaprocessual/`;
       this.logger.log(`🌐 Acessando URL base: ${urlBase}`);
       await page.setUserAgent(
