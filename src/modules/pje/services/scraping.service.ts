@@ -571,15 +571,31 @@ export class NewScrapingService {
         this.logger.log(
           `🔍 Tentativa ${attempt} de ${maxRetries} para encontrar o seletor: ${selector}`,
         );
+
+        // Verifica se o seletor existe no DOM antes de esperar por visibilidade
+        const exists = await page.evaluate((sel) => {
+          return !!document.querySelector(sel);
+        }, selector);
+
+        if (!exists) {
+          this.logger.warn(
+            `⚠️ Seletor ${selector} não encontrado no DOM na tentativa ${attempt}.`,
+          );
+          throw new Error(`Seletor ${selector} não encontrado no DOM.`);
+        }
+
         await page.waitForSelector(selector, {
           visible: true,
           timeout: delayMs,
         });
+
         this.logger.log(`✅ Seletor encontrado: ${selector}`);
         return;
-      } catch {
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erro desconhecido';
         this.logger.warn(
-          `⚠️ Tentativa ${attempt} falhou para o seletor: ${selector}`,
+          `⚠️ Tentativa ${attempt} falhou para o seletor: ${selector}. Erro: ${errorMessage}`,
         );
         if (attempt === maxRetries) {
           throw new Error(

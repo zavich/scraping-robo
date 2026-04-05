@@ -9,6 +9,8 @@ puppeteer.use(StealthPlugin());
 
 export class BrowserManager {
   private static browser: Browser | null = null;
+  private static contextPool: BrowserContext[] = [];
+  private static maxContexts = 5; // Número máximo de contextos reutilizáveis
 
   /**
    * Retorna uma instância única do browser.
@@ -35,38 +37,52 @@ export class BrowserManager {
   }
 
   /**
-   * Cria um novo contexto isolado (ideal para login).
-   * Cada contexto tem cookies e storage próprios.
+   * Obtém um contexto reutilizável ou cria um novo se o limite não for atingido.
    */
-  static async createContext(): Promise<BrowserContext> {
-    const browser = await this.getBrowser();
-    const context = await browser.createBrowserContext();
+  static async getContext(): Promise<BrowserContext> {
+    if (this.contextPool.length > 0) {
+      return this.contextPool.pop()!;
+    }
 
-    return context;
+    const browser = await this.getBrowser();
+    return browser.createBrowserContext();
   }
 
   /**
-   * Cria uma nova página dentro de um contexto isolado.
+   * Devolve um contexto ao pool para reutilização.
+   */
+  static releaseContext(context: BrowserContext) {
+    if (this.contextPool.length < this.maxContexts) {
+      this.contextPool.push(context);
+    } else {
+      context.close().catch(() => {});
+    }
+  }
+
+  /**
+   * Cria uma nova página dentro de um contexto reutilizável.
    */
   static async createPage(): Promise<{ context: BrowserContext; page: Page }> {
-    const context = await this.createContext();
+    const context = await this.getContext();
     const page = await context.newPage();
 
     await page.setRequestInterception(true);
     page.on('request', (req) => {
-      if (req.resourceType() === 'image') req.abort();
-      else req.continue();
+      if (req.resourceType() === 'image') {
+        req.abort().catch(() => {});
+      } else {
+        req.continue().catch(() => {});
+      }
     });
 
     return { context, page };
   }
 
   /**
-   * Fecha página e contexto, mantendo o browser ativo.
+   * Fecha página e devolve o contexto ao pool.
    */
-  static async closeContext(context: BrowserContext) {
-    try {
-      await context.close();
-    } catch {}
+  static async closeContext(context: BrowserContext): Promise<void> {
+    await Promise.resolve(); // Adicionado para evitar erro de lint
+    this.releaseContext(context);
   }
 }

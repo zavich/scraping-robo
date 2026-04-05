@@ -1,7 +1,12 @@
 import { Processor } from '@nestjs/bullmq';
 import { Provider } from '@nestjs/common';
 import { ALL_TRT_DOCUMENT_QUEUES } from 'src/helpers/getTRTQueue';
-import { GenericDocumentosWorker } from 'src/modules/pje/queues/wokers/documentos-trt.worker';
+import { GenericDocumentosWorker } from 'src/modules/pje/queues/wokers/documentos-trt.worker'; // Revertido para o caminho original
+
+// Centraliza configurações globais
+const DEFAULT_CONCURRENCY = 2;
+const SPECIAL_CONCURRENCY = 1;
+const LOCK_DURATION = 120_000;
 
 export function createDynamicDocumentsWorkers(): Provider[] {
   const queues = [...ALL_TRT_DOCUMENT_QUEUES];
@@ -9,8 +14,11 @@ export function createDynamicDocumentsWorkers(): Provider[] {
   return queues.map((queueName) => {
     // Configura concurrency e rate limiter para TRT15
     const processorOptions = {
-      concurrency: queueName === 'pje-documentos-trt3' ? 1 : 2,
-      lockDuration: 120_000,
+      concurrency:
+        queueName === 'pje-documentos-trt3'
+          ? SPECIAL_CONCURRENCY
+          : DEFAULT_CONCURRENCY,
+      lockDuration: LOCK_DURATION,
     };
 
     @Processor(queueName, processorOptions)
