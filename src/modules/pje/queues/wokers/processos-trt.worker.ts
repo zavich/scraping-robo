@@ -118,6 +118,8 @@ export class GenericProcessoWorker extends WorkerHost {
         numero,
         origem,
       );
+      console.log('INSTANCES:', instances);
+
       const result = instances.slice(0, 2);
 
       if (!instances || instances.length === 0) {
