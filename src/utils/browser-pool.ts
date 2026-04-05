@@ -18,7 +18,7 @@ export class BrowserPool {
 
   async init() {
     for (let i = 0; i < this.maxContexts; i++) {
-      const context = await BrowserManager.createContext();
+      const context = await BrowserManager.getContext();
       this.pool.push({ context, busy: false });
     }
     console.log(`✅ Pool inicializado com ${this.maxContexts} contexts`);
