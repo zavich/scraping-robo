@@ -15,8 +15,8 @@ export function createDynamicDocumentsWorkers(): Provider[] {
     const processorOptions = {
       concurrency: DEFAULT_CONCURRENCY,
       limiter: {
-        max: 1,
-        duration: 5000, // 1 request a cada 5s
+        max: 2,
+        duration: 1000,
       },
       lockDuration: LOCK_DURATION,
     };
