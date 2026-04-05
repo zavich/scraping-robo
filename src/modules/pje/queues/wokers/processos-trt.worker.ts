@@ -246,7 +246,7 @@ export class GenericProcessoWorker extends WorkerHost {
           },
         );
       }
-      console.log('RESPONSE:', response);
+      console.log('RESPONSE:', response.resposta);
       this.logger.log(`✅ [${job.queueName}] Finalizado ${numero}`);
       await axios.post(webhookUrl, response);
     } catch (error) {
