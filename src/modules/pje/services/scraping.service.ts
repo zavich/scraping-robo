@@ -27,7 +27,7 @@ export class NewScrapingService {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
           '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       );
-      await page.goto(urlBase, { waitUntil: 'networkidle0' });
+      await page.goto(urlBase, { waitUntil: 'domcontentloaded' });
       await page
         .waitForFunction(
           () => {
@@ -281,7 +281,7 @@ export class NewScrapingService {
         //
         const originalCookies = await page.cookies();
         await this.redis.set(
-          `aws-waf-token:${processNumber}`,
+          `aws-waf-token:${regionTRT}`,
           originalCookies.map((c) => `${c.name}=${c.value}`).join('; '),
           'EX',
           3600,

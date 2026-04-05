@@ -63,11 +63,7 @@ export class BrowserManager {
    * Cria uma nova página dentro de um contexto reutilizável.
    */
   static async createPage(): Promise<{ context: BrowserContext; page: Page }> {
-    const browser = await this.getBrowser();
-
-    // 🔥 NOVO: cria contexto isolado SEMPRE
-    const context = await browser.createBrowserContext();
-
+    const context = await this.getContext(); // ✅ usa pool
     const page = await context.newPage();
 
     await page.setRequestInterception(true);
@@ -86,9 +82,9 @@ export class BrowserManager {
   /**
    * Fecha página e devolve o contexto ao pool.
    */
-  static async closeContext(context: BrowserContext): Promise<void> {
+  static closeContext(context: BrowserContext): void {
     try {
-      await context.close(); // 🔥 mata o contexto
+      this.releaseContext(context); // ✅ devolve pro pool
     } catch {}
   }
 }
