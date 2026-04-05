@@ -49,9 +49,10 @@ export class FetchDocumentoService {
             userAgents[Math.floor(Math.random() * userAgents.length)],
         },
         timeout: 300000,
-        responseType: 'arraybuffer',
+        // responseType: 'arraybuffer',
         withCredentials: true,
       });
+      console.log('Resposta do servidor ao baixar PDF:', response.data);
 
       if (!response.data || response.data.length === 0) {
         throw new Error('Resposta vazia ao baixar PDF');

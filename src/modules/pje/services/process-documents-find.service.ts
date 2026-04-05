@@ -197,11 +197,11 @@ export class ProcessDocumentsFindService {
 
       // remove o arquivo temporário
       try {
-        fs.promises
-          .unlink(filePath)
-          .catch((err) =>
-            this.logger.warn(`Não foi possível deletar: ${err.message}`),
-          );
+        // fs.promises
+        //   .unlink(filePath)
+        //   .catch((err) =>
+        //     this.logger.warn(`Não foi possível deletar: ${err.message}`),
+        //   );
 
         this.logger.debug(
           `🗑️ Arquivo temporário ${filePath} deletado com sucesso`,
