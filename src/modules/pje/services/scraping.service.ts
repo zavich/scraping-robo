@@ -504,6 +504,19 @@ export class NewScrapingService {
               return;
             }
 
+            // Captura o tokenCaptcha dos headers
+            const tokenCaptcha = headers['captchatoken'];
+            if (tokenCaptcha) {
+              this.logger.log(`🔑 TokenCaptcha capturado: ${tokenCaptcha}`);
+
+              // Armazena o tokenCaptcha no Redis
+              const redisKey = `captchatoken:${processNumber}:${instance}`;
+              await this.redis.set(redisKey, tokenCaptcha, 'EX', 3600);
+              this.logger.log(
+                `✅ TokenCaptcha armazenado no Redis com a chave: ${redisKey}`,
+              );
+            }
+
             try {
               const responseJson = (await response.json()) as ProcessosResponse;
               if (
@@ -521,6 +534,13 @@ export class NewScrapingService {
             } catch (err) {
               this.logger.log(`⚠️ Erro ao processar a resposta: ${err}`);
             }
+          }
+
+          // Captura o tokenDesafio da URL da resposta subsequente
+          const tokenDesafioMatch = url.match(/tokenDesafio=([^&]+)/);
+          const tokenDesafio = tokenDesafioMatch ? tokenDesafioMatch[1] : null;
+          if (tokenDesafio) {
+            this.logger.log(`🔑 TokenDesafio capturado: ${tokenDesafio}`);
           }
         })();
       };
