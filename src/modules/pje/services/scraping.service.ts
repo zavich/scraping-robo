@@ -278,11 +278,12 @@ export class NewScrapingService {
       await page.reload({ waitUntil: 'networkidle0' });
       this.logger.log('🔁 Página recarregada — AWS WAF liberado!');
     }
+    // Substitui a espera direta pelo retry para o inputSelector
     this.logger.log(
       '🔍 Identificando campo de entrada do número do processo...',
     );
     const inputSelector = '#nrProcessoInput'; // Atualizado para usar o ID correto
-    await page.waitForSelector(inputSelector, { visible: true });
+    await this.waitForSelectorWithRetry(page, inputSelector);
 
     // Simula digitação natural do número do processo
     for (const char of processNumber) {
@@ -536,5 +537,37 @@ export class NewScrapingService {
 
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  // Função auxiliar para realizar o retry
+  private async waitForSelectorWithRetry(
+    page: import('puppeteer').Page,
+    selector: string,
+    maxRetries: number = 5,
+    delayMs: number = 1000,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        this.logger.log(
+          `🔍 Tentativa ${attempt} de ${maxRetries} para encontrar o seletor: ${selector}`,
+        );
+        await page.waitForSelector(selector, {
+          visible: true,
+          timeout: delayMs,
+        });
+        this.logger.log(`✅ Seletor encontrado: ${selector}`);
+        return;
+      } catch {
+        this.logger.warn(
+          `⚠️ Tentativa ${attempt} falhou para o seletor: ${selector}`,
+        );
+        if (attempt === maxRetries) {
+          throw new Error(
+            `❌ Não foi possível encontrar o seletor: ${selector} após ${maxRetries} tentativas.`,
+          );
+        }
+        await this.delay(delayMs); // Aguarda antes de tentar novamente
+      }
+    }
   }
 }
