@@ -30,10 +30,10 @@ export class FetchDocumentoService {
       const tokenCaptcha = await this.redis.get(redisTokenCaptchaKey);
       const cookies = (await this.redis.get(redisKey)) as string;
 
-      const redisKeyAWS = `aws-waf-token:${processNumber}`;
+      const redisKeyAWS = `aws-waf-token:${regionTRT}`;
       const aws = await this.redis.get(redisKeyAWS);
       const typeUrl = instancia === '3' ? 'tst' : `trt${regionTRT}`;
-      const url = `https://pje.${typeUrl}.jus.br/pje-consulta-api/api/processos/${processId}/integra?tokenCaptcha=${tokenCaptcha || ''}`;
+      const url = `https://pje.${typeUrl}.jus.br/pje-consulta-api/api/processos/${processId}/integra?tokenCaptcha=${tokenCaptcha}`;
 
       // 🔹 Extrai access_token_1g do cookie
       const match = cookies.match(/access_token_1g=([^;]+)/);
@@ -52,6 +52,22 @@ export class FetchDocumentoService {
         responseType: 'arraybuffer',
         withCredentials: true,
       });
+
+      if (!response.data || response.data.length === 0) {
+        throw new Error('Resposta vazia ao baixar PDF');
+      }
+
+      const contentType = response.headers['content-type'];
+
+      if (!contentType || !contentType.includes('application/pdf')) {
+        const text = Buffer.from(response.data).toString('utf-8');
+
+        this.logger.error('❌ Não é PDF, resposta recebida:');
+        this.logger.error(text.slice(0, 500));
+
+        throw new Error('Resposta não é PDF (provável bloqueio)');
+      }
+
       const buffer = Buffer.from(response.data);
 
       // cria pasta temp se não existir
