@@ -6,7 +6,7 @@ import Redis from 'ioredis';
 import { ProcessosResponse } from 'src/interfaces';
 import { CaptchaService } from 'src/services/captcha.service';
 import { userAgents } from 'src/utils/user-agents';
-import { NewScrapingService } from './scraping.service';
+import { ScrapingService } from './scraping.service';
 
 @Injectable()
 export class FetchUrlMovimentService {
@@ -15,7 +15,7 @@ export class FetchUrlMovimentService {
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-    private readonly newScrapingService: NewScrapingService,
+    private readonly scrapingService: ScrapingService,
   ) {}
 
   private async delay(ms: number) {
@@ -85,11 +85,7 @@ export class FetchUrlMovimentService {
           );
           await this.delay(delayMs);
           const { data: processoResponse, multipleInstances } =
-            await this.newScrapingService.execute(
-              numeroDoProcesso,
-              regionTRT,
-              i,
-            );
+            await this.scrapingService.execute(numeroDoProcesso, regionTRT, i);
 
           instances.push(processoResponse);
           if (!multipleInstances) break;

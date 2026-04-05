@@ -2,13 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, Logger } from '@nestjs/common';
 import { ProcessosResponse } from 'src/interfaces';
-import { ScrapingService } from '../../../helpers/scraping.service';
 
 @Injectable()
 export class WebScrapingMovimentService {
   private readonly logger = new Logger(WebScrapingMovimentService.name);
-
-  constructor(private readonly scrapingService: ScrapingService) {}
 
   async execute(
     numeroDoProcesso: string,

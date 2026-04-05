@@ -2,20 +2,14 @@ import { getQueueToken, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { Job, Queue } from 'bullmq';
-import { normalizeResponse } from 'src/utils/normalizeResponse';
-import { WebScrapingMovimentService } from '../../services/web-scraping-moviment.service';
-import { FetchUrlMovimentService } from '../../services/fetch-url.service';
 import dayjs from 'dayjs';
-import { ScrapingService } from 'src/helpers/scraping.service';
+import { normalizeResponse } from 'src/utils/normalizeResponse';
+import { FetchUrlMovimentService } from '../../services/fetch-url.service';
 
 export class GenericProcessoWorker extends WorkerHost {
   private readonly logger = new Logger(GenericProcessoWorker.name);
   private readonly documentosQueues: Record<string, Queue> = {};
   constructor(
-    @Inject(WebScrapingMovimentService)
-    private readonly webScrapingMovimentService: WebScrapingMovimentService,
-    @Inject(ScrapingService)
-    private readonly scrapingService: ScrapingService,
     @Inject(FetchUrlMovimentService)
     private readonly fetchUrlMovimentService: FetchUrlMovimentService,
 

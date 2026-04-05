@@ -11,7 +11,6 @@ import Redis from 'ioredis';
 import { Documento, ProcessosResponse } from 'src/interfaces';
 import { AwsS3Service } from 'src/services/aws-s3.service';
 import { normalizeString } from 'src/utils/normalize-string';
-import { DocumentoService } from './documents.service';
 import { PdfExtractService } from './extract.service';
 import { FetchDocumentoService } from './fetch-documents-url.service';
 
@@ -19,7 +18,6 @@ import { FetchDocumentoService } from './fetch-documents-url.service';
 export class ProcessDocumentsFindService {
   logger = new Logger(ProcessDocumentsFindService.name);
   constructor(
-    private readonly documentoService: DocumentoService,
     private readonly fetchDocumentoService: FetchDocumentoService,
     private readonly awsS3Service: AwsS3Service,
     private readonly pdfExtractService: PdfExtractService,

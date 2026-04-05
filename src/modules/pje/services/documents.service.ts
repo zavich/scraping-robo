@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { ScrapingService } from 'src/helpers/scraping.service';
+import { ScrapingService } from './scraping.service';
 
 @Injectable()
 export class DocumentoService {
@@ -12,37 +12,32 @@ export class DocumentoService {
     processNumber: string,
     regionTRT: number,
     instanceIndex: number,
-  ): Promise<string> {
+  ) {
     try {
       // chama o ScrapingService
-      const { integra } = await this.scrapingService.execute(
-        processNumber,
-        regionTRT,
-        instanceIndex,
-        true,
-        true,
-      );
-
-      if (!integra) {
-        this.logger.warn('⚠ PDF /integra não foi capturado');
-        return '';
-      }
-
-      // cria pasta temp se não existir
-      const tempDir = path.join(process.cwd(), 'tmp');
-      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-      const sanitizedProcessNumber = processNumber.replace(/\D+/g, '');
-      const fileName = `proc_${sanitizedProcessNumber}_${instanceIndex}_${Date.now()}_${Math.random()
-        .toString(36)
-        .slice(2, 8)}.pdf`;
-      const filePath = path.join(tempDir, fileName);
-
-      // salva o PDF no disco
-      fs.writeFileSync(filePath, integra);
-
-      this.logger.log(`PDF salvo em: ${filePath}`);
-      return filePath;
+      // const { integra } = await this.scrapingService.execute(
+      //   processNumber,
+      //   regionTRT,
+      //   instanceIndex,
+      //   true,
+      //   true,
+      // );
+      // if (!integra) {
+      //   this.logger.warn('⚠ PDF /integra não foi capturado');
+      //   return '';
+      // }
+      // // cria pasta temp se não existir
+      // const tempDir = path.join(process.cwd(), 'tmp');
+      // if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+      // const sanitizedProcessNumber = processNumber.replace(/\D+/g, '');
+      // const fileName = `proc_${sanitizedProcessNumber}_${instanceIndex}_${Date.now()}_${Math.random()
+      //   .toString(36)
+      //   .slice(2, 8)}.pdf`;
+      // const filePath = path.join(tempDir, fileName);
+      // // salva o PDF no disco
+      // fs.writeFileSync(filePath, integra);
+      // this.logger.log(`PDF salvo em: ${filePath}`);
+      // return filePath;
     } catch (error) {
       this.logger.error('Erro ao executar DocumentoService', error);
       throw error;

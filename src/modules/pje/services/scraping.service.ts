@@ -3,16 +3,20 @@ import Redis from 'ioredis';
 import { Page } from 'puppeteer';
 import { ProcessosResponse } from 'src/interfaces';
 import { CaptchaService } from 'src/services/captcha.service';
+import { BrowserPool } from 'src/utils/browser-pool';
 import { BrowserManager } from 'src/utils/browser.manager';
 
 @Injectable()
-export class NewScrapingService {
-  private readonly logger = new Logger(NewScrapingService.name);
+export class ScrapingService {
+  private readonly logger = new Logger(ScrapingService.name);
 
+  private readonly pool = new BrowserPool(10); // exemplo: 30 contexts simultâneos
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-  ) {}
+  ) {
+    this.pool.init();
+  }
 
   async execute(processNumber: string, regionTRT: number, instance: number) {
     const { page, context } = await BrowserManager.createPage();
