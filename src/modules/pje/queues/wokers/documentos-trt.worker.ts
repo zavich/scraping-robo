@@ -68,7 +68,7 @@ export class GenericDocumentosWorker extends WorkerHost {
 
       await axios.post(webhookUrl, response);
     } catch (error: any) {
-      this.logger.error(error);
+      this.logger.error('error', error);
 
       const resp = normalizeResponse(
         numero,
