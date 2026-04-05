@@ -12,7 +12,7 @@ export class BrowserPool {
   private pool: PoolItem[] = [];
   private maxContexts: number;
 
-  constructor(maxContexts = 3) {
+  constructor(maxContexts = 5) {
     this.maxContexts = maxContexts;
   }
 

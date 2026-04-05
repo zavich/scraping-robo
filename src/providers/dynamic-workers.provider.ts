@@ -3,7 +3,7 @@ import { Processor } from '@nestjs/bullmq';
 import { ALL_TRT_QUEUES } from 'src/helpers/getTRTQueue';
 import { GenericProcessoWorker } from '../modules/pje/queues/wokers/processos-trt.worker';
 const DEFAULT_CONCURRENCY = 2;
-const LOCK_DURATION = 300_000;
+const LOCK_DURATION = 300_000; // 5 minutos
 export function createDynamicWorkers(): Provider[] {
   const queues = [...ALL_TRT_QUEUES, 'pje-tst'];
 

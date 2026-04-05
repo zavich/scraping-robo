@@ -5,7 +5,7 @@ import { GenericDocumentosWorker } from 'src/modules/pje/queues/wokers/documento
 
 // Centraliza configurações globais
 const DEFAULT_CONCURRENCY = 1;
-const LOCK_DURATION = 300_000;
+const LOCK_DURATION = 300_000; // 5 minutos
 
 export function createDynamicDocumentsWorkers(): Provider[] {
   const queues = [...ALL_TRT_DOCUMENT_QUEUES];
