@@ -445,10 +445,6 @@ export class ScrapingService {
         await client.send('Network.disable');
       } catch {}
 
-      try {
-        if (page && !page.isClosed()) await page.close();
-      } catch {}
-
       this.pool.release(context);
       this.logger.log('✅ Contexto liberado');
     }
