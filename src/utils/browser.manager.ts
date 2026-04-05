@@ -20,13 +20,20 @@ export class BrowserManager {
       this.browser = await puppeteer.launch({
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: true,
+        // args: [
+        //   '--no-sandbox',
+        //   '--disable-setuid-sandbox',
+        //   '--disable-dev-shm-usage',
+        //   '--disable-gpu',
+        //   '--no-zygote',
+        //   '--disable-software-rasterizer',
+        // ],
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
           '--no-zygote',
-          '--single-process',
         ],
         protocolTimeout: 300000,
         timeout: 300000,
