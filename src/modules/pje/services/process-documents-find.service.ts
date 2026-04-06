@@ -239,18 +239,18 @@ export class ProcessDocumentsFindService {
             return;
           }
 
-          const fileName = `${bookmark.title.replace(/\s+/g, '_')}_${bookmark.index}_${Date.now()}_${Math.random()
+          const fileKey = `${this.normalize(bookmark.title)}_${bookmark.index}_${Date.now()}_${Math.random()
             .toString(36)
             .slice(2, 8)}.pdf`;
           await this.awsS3Service.uploadS3Object(
             process.env.AWS_S3_BUCKET_NAME as string,
-            fileName,
+            fileKey,
             extractedPdfBuffer,
             'application/pdf',
           );
           uploadedDocuments.push({
             title: bookmark.title,
-            temp_link: fileName,
+            temp_link: fileKey,
             uniqueName: bookmark.id,
             date: bookmark.data ?? '',
           });
@@ -303,4 +303,11 @@ export class ProcessDocumentsFindService {
 
     return uploadedDocuments;
   }
+  normalize = (str: string) =>
+    str
+      .normalize('NFD') // separa acentos
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/[^\w\s-]/g, '') // remove caracteres especiais
+      .trim()
+      .replace(/\s+/g, '_');
 }
