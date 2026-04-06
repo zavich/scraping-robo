@@ -10,10 +10,6 @@ export function createDynamicWorkers(): Provider[] {
   return queues.map((queueName) => {
     const processorOptions = {
       concurrency: DEFAULT_CONCURRENCY,
-      limiter: {
-        max: 2,
-        duration: 1000,
-      },
       lockDuration: LOCK_DURATION,
     };
 
