@@ -25,9 +25,7 @@ export class FetchUrlMovimentService {
     numeroDoProcesso: string,
     origem?: string,
   ): Promise<ProcessosResponse[]> {
-    this.logger.log(
-      `Iniciando execução para o processo: ${numeroDoProcesso}, origem: ${origem}`,
-    );
+    this.logger.log(`Iniciando execução para o processo: ${numeroDoProcesso}`);
 
     const regionTRT = numeroDoProcesso?.includes('.')
       ? Number(numeroDoProcesso.split('.')[3])
