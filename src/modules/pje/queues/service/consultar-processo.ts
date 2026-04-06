@@ -91,12 +91,12 @@ export class ConsultarProcessoQueue {
     if (!queue) {
       throw new BadRequestException('Fila não encontrada');
     }
-    const jobId = `${numero}-${Date.now()}`;
+
     // ✅ Se job existir, remove antes de reprocessar
-    const existing = (await queue.getJob(jobId)) as Job | undefined;
+    const existing = (await queue.getJob(numero)) as Job | undefined;
     if (existing) {
       await existing.remove();
-      this.logger.warn(`♻️ Job removido para reprocessamento: ${jobId}`);
+      this.logger.warn(`♻️ Job removido para reprocessamento: ${numero}`);
     }
 
     // ✅ Agora pode adicionar novamente
@@ -104,7 +104,7 @@ export class ConsultarProcessoQueue {
       'consulta-processo',
       { numero, origem, documents, webhook },
       {
-        jobId,
+        jobId: numero,
         attempts: 3,
         priority: priority ? 0 : 5,
         backoff: { type: 'fixed', delay: 5000 },
