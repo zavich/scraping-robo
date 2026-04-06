@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install
+RUN npm ci
 
 # Copia código
 COPY . .
@@ -75,24 +75,23 @@ FROM node:18-slim
 # Instala Chromium e libs para Puppeteer
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-common \
-    chromium-driver \
-    libx11-6 \
+    libnss3 \
     libx11-xcb1 \
-    libxcb1 \
     libxcomposite1 \
-    libxcursor1 \
     libxdamage1 \
     libxrandr2 \
     libgbm1 \
     libasound2 \
     libcups2 \
-    libnss3 \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
+    libxshmfence1 \
+    libxrender1 \
+    libxi6 \
+    libxtst6 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
