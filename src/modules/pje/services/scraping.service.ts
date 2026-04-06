@@ -10,7 +10,7 @@ import { BrowserManager } from 'src/utils/browser.manager';
 export class ScrapingService {
   private readonly logger = new Logger(ScrapingService.name);
 
-  private readonly pool = new BrowserPool(2); // exemplo: 1 context simultâneo
+  private readonly pool = new BrowserPool(15); // exemplo: 15 contextos simultâneos
   private isInitialized = false;
   constructor(
     private readonly captchaService: CaptchaService,
