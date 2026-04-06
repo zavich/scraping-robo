@@ -10,7 +10,7 @@ import { BrowserManager } from 'src/utils/browser.manager';
 export class ScrapingService {
   private readonly logger = new Logger(ScrapingService.name);
 
-  private readonly pool = new BrowserPool(50); // exemplo: 50 contextos simultâneos
+  private readonly pool = new BrowserPool(5); // Reduzir o limite
   private isInitialized = false;
   constructor(
     private readonly captchaService: CaptchaService,
@@ -42,7 +42,7 @@ export class ScrapingService {
       );
       await page.goto(urlBase, {
         waitUntil: 'domcontentloaded',
-        timeout: 60000,
+        timeout: 120000, // Aumentar para 2 minutos
       });
       await page
         .waitForFunction(

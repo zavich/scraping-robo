@@ -13,7 +13,7 @@ import { userAgents } from 'src/utils/user-agents';
 @Injectable()
 export class PjeLoginService {
   private readonly logger = new Logger(PjeLoginService.name);
-  private readonly pool = new BrowserPool(15); // exemplo: 15 context simultâneos
+  private readonly pool = new BrowserPool(10); // exemplo: 15 context simultâneos
 
   constructor(
     private readonly captchaService: CaptchaService,
