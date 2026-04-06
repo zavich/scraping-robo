@@ -600,7 +600,7 @@ export class ScrapingService {
 
         page.on('response', handler);
       });
-
+      await page.waitForNetworkIdle({ idleTime: 500 }).catch(() => {});
       // Finaliza a extensão (fecha a página e o contexto do navegador)
 
       return { data: extractedData, multipleInstances };
