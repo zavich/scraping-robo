@@ -43,15 +43,15 @@
 # EXPOSE 8081
 # CMD ["dumb-init", "node", "dist/main"]
 # ---------- STAGE 1: BUILD ----------
+# ---------- STAGE 1: BUILD ----------
 FROM node:20-slim AS build
-FROM node:20-slim
 
 WORKDIR /app
 
 # Copia arquivos do Node
 COPY package*.json ./
 
-# Instala dependências incluindo canvas
+# Instala dependências necessárias para canvas
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcairo2-dev \
@@ -61,17 +61,19 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Instala todas dependências
 RUN npm ci
 
-# Copia código
+# Copia código fonte
 COPY . .
 
-# Compila Nest
+# Compila NestJS
 RUN npm run build
 
-
 # ---------- STAGE 2: RUN ----------
-FROM node:18-slim
+FROM node:20-slim
+
+WORKDIR /usr/src/app
 
 # Instala Chromium e libs para Puppeteer
 RUN apt-get update && apt-get install -y \
@@ -95,19 +97,22 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
+# Variáveis de ambiente Puppeteer
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV NODE_ENV=production
 
-WORKDIR /usr/src/app
-
-# Copia node_modules já compilado (incluindo canvas)
+# Copia dependências do build
 COPY --from=build /app/node_modules ./node_modules
 
-# Copia os arquivos compilados
+# Copia build compilado
 COPY --from=build /app/dist ./dist
 
+# Copia package.json para referência
 COPY package*.json ./
 
+# Exposição de porta
 EXPOSE 8081
+
+# Comando final
 CMD ["node", "dist/main"]
