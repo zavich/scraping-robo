@@ -18,23 +18,24 @@ export class BrowserManager {
   static async getBrowser(): Promise<Browser> {
     if (!this.browser) {
       this.browser = await puppeteer.launch({
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
         headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage', // Crítico para Railway/Docker
+          '--disable-gpu',
+          '--no-zygote',
+          '--single-process', // Ajuda a economizar RAM em ambientes limitados
+          '--disable-extensions',
+        ],
         // args: [
         //   '--no-sandbox',
         //   '--disable-setuid-sandbox',
         //   '--disable-dev-shm-usage',
         //   '--disable-gpu',
         //   '--no-zygote',
-        //   '--disable-software-rasterizer',
         // ],
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--no-zygote',
-        ],
         protocolTimeout: 300000,
         timeout: 300000,
       });
