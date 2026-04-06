@@ -2,6 +2,11 @@ version: '3'
 
 services:
   scraping-robo:
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
     build: .
     shm_size: 1gb
     container_name: scraping-robo
@@ -28,27 +33,18 @@ services:
       - '8081'
     ports:
       - '8081:8081'
+    tmpfs:
+      - /dev/shm:size=1g
 
-  redis:
-    image: redis:7
-    container_name: redis
-    command:
-      [
-        'redis-server',
-        '--save',
-        '900',
-        '1',
-        '--save',
-        '300',
-        '10',
-        '--stop-writes-on-bgsave-error',
-        'no',
-      ]
-    restart: always
-    volumes:
-      - redis-data:/data
-    networks:
-      - traefik-net
+redis:
+  image: redis:7
+  container_name: redis
+  command: redis-server --save 900 1 --save 300 10 --maxmemory 512mb --maxmemory-policy allkeys-lru
+  restart: always
+  volumes:
+    - redis-data:/data
+  networks:
+    - traefik-net
 networks:
   traefik-net:
     external: true

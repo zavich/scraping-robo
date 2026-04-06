@@ -43,7 +43,8 @@
 # EXPOSE 8081
 # CMD ["dumb-init", "node", "dist/main"]
 # ---------- STAGE 1: BUILD ----------
-FROM node:18-slim AS build
+FROM node:20-slim AS build
+FROM node:20-slim
 
 WORKDIR /app
 
