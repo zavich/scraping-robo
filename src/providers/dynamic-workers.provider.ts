@@ -2,7 +2,7 @@ import { Provider } from '@nestjs/common';
 import { Processor } from '@nestjs/bullmq';
 import { ALL_TRT_QUEUES } from 'src/helpers/getTRTQueue';
 import { GenericProcessoWorker } from '../modules/pje/queues/wokers/processos-trt.worker';
-const DEFAULT_CONCURRENCY = 10;
+const DEFAULT_CONCURRENCY = 5;
 const LOCKRENEW_DURATION = 30000; // 1 minuto
 const LOCK_DURATION = 600000; // 5 minutos
 const STALLED_INTERVAL = 60000; // 1 minuto

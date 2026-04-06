@@ -27,14 +27,8 @@ export class BrowserManager {
           '--disable-gpu',
           '--no-zygote',
           '--disable-software-rasterizer',
+          '--incognito',
         ],
-        // args: [
-        //   '--no-sandbox',
-        //   '--disable-setuid-sandbox',
-        //   '--disable-dev-shm-usage',
-        //   '--disable-gpu',
-        //   '--no-zygote',
-        // ],
         protocolTimeout: 300000,
         timeout: 300000,
       });
