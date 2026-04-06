@@ -4,8 +4,8 @@ import { ALL_TRT_DOCUMENT_QUEUES } from 'src/helpers/getTRTQueue';
 import { GenericDocumentosWorker } from 'src/modules/pje/queues/wokers/documentos-trt.worker'; // Revertido para o caminho original
 
 // Centraliza configurações globais
-const DEFAULT_CONCURRENCY = 2;
-const LOCK_DURATION = 300_000; // 5 minutos
+const DEFAULT_CONCURRENCY = 10;
+const LOCK_DURATION = 600000; // 5 minutos
 
 export function createDynamicDocumentsWorkers(): Provider[] {
   const queues = [...ALL_TRT_DOCUMENT_QUEUES];
