@@ -93,11 +93,11 @@ export class ConsultarProcessoQueue {
     }
 
     // ✅ Se job existir, remove antes de reprocessar
-    const existing = (await queue.getJob(numero)) as Job | undefined;
-    if (existing) {
-      await existing.remove();
-      this.logger.warn(`♻️ Job removido para reprocessamento: ${numero}`);
-    }
+    // const existing = (await queue.getJob(numero)) as Job | undefined;
+    // if (existing) {
+    //   await existing.remove();
+    //   this.logger.warn(`♻️ Job removido para reprocessamento: ${numero}`);
+    // }
 
     // ✅ Agora pode adicionar novamente
     await queue.add(
