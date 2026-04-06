@@ -79,10 +79,7 @@ export class FetchUrlMovimentService {
       const initialGrau = origem === 'TST' ? 3 : 1;
       for (let i = initialGrau; i <= grauMax; i++) {
         try {
-          const delayMs = this.getRandomDelay(regionTRT);
-          this.logger.debug(
-            `⏱ Delay de ${delayMs}ms antes de buscar a ${i}ª instância`,
-          );
+          const delayMs = 1000;
           await this.delay(delayMs);
           const { data: processoResponse, multipleInstances } =
             await this.scrapingService.execute(numeroDoProcesso, regionTRT, i);

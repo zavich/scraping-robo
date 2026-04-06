@@ -10,7 +10,8 @@ import { BrowserManager } from 'src/utils/browser.manager';
 export class ScrapingService {
   private readonly logger = new Logger(ScrapingService.name);
 
-  private readonly pool = new BrowserPool(1); // exemplo: 1 context simultâneo
+  private readonly pool = new BrowserPool(2); // exemplo: 1 context simultâneo
+  private isInitialized = false;
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
@@ -19,6 +20,10 @@ export class ScrapingService {
   }
 
   async execute(processNumber: string, regionTRT: number, instance: number) {
+    if (!this.isInitialized) {
+      await this.pool.init();
+      this.isInitialized = true;
+    }
     // 1. Adquire o contexto do Pool (respeita o limite de 5)
     const context = await this.pool.acquire();
     // 2. Cria a página dentro desse contexto
