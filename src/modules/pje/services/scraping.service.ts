@@ -10,7 +10,7 @@ import { BrowserManager } from 'src/utils/browser.manager';
 export class ScrapingService {
   private readonly logger = new Logger(ScrapingService.name);
 
-  private readonly pool = new BrowserPool(10); // exemplo: 30 contexts simultâneos
+  private readonly pool = new BrowserPool(5); // exemplo: 5 contexts simultâneos
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
