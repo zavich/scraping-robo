@@ -6,17 +6,20 @@ import {
 } from '@nestjs/common';
 import Redis from 'ioredis';
 import { CaptchaService } from 'src/services/captcha.service';
+import { BrowserPool } from 'src/utils/browser-pool';
 import { BrowserManager } from 'src/utils/browser.manager';
 import { userAgents } from 'src/utils/user-agents';
 
 @Injectable()
 export class PjeLoginService {
   private readonly logger = new Logger(PjeLoginService.name);
+  private readonly pool = new BrowserPool(1); // exemplo: 1 context simultâneo
+
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {
-    // this.pool.init(); // inicializa o pool
+    this.pool.init();
   }
   async execute(
     regionTRT: number,
@@ -31,7 +34,10 @@ export class PjeLoginService {
       return { cookies: cachedCookies };
     }
 
-    const { context, page } = await BrowserManager.createPage();
+    // 1. Adquire o contexto do Pool (respeita o limite de 5)
+    const context = await this.pool.acquire();
+    // 2. Cria a página dentro desse contexto
+    const page = await BrowserManager.createPageInContext(context);
 
     try {
       const loginUrl = `https://pje.trt${regionTRT}.jus.br/consultaprocessual`;
@@ -390,7 +396,12 @@ export class PjeLoginService {
 
       return { cookies: cookieString };
     } finally {
-      await BrowserManager.closeContext(context);
+      // 3. O PULO DO GATO: Fechar a página antes de liberar o contexto
+      if (page) await page.close().catch(() => {});
+
+      // 4. Libera o contexto para o próximo job da fila
+      this.pool.release(context);
+      this.logger.log('✅ Contexto liberado e aba fechada');
     }
   }
 }

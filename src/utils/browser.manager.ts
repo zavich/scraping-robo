@@ -94,4 +94,19 @@ export class BrowserManager {
       this.releaseContext(context); // ✅ devolve pro pool
     } catch {}
   }
+  static async createPageInContext(context: BrowserContext): Promise<Page> {
+    const page = await context.newPage();
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      // Bloquear CSS no PJe economiza MUITA CPU no Railway
+      if (
+        ['image', 'font', 'media', 'stylesheet'].includes(req.resourceType())
+      ) {
+        req.abort().catch(() => {});
+      } else {
+        req.continue().catch(() => {});
+      }
+    });
+    return page;
+  }
 }

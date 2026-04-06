@@ -10,7 +10,7 @@ import { BrowserManager } from 'src/utils/browser.manager';
 export class ScrapingService {
   private readonly logger = new Logger(ScrapingService.name);
 
-  private readonly pool = new BrowserPool(5); // exemplo: 5 contexts simultâneos
+  private readonly pool = new BrowserPool(1); // exemplo: 1 context simultâneo
   constructor(
     private readonly captchaService: CaptchaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
@@ -19,7 +19,11 @@ export class ScrapingService {
   }
 
   async execute(processNumber: string, regionTRT: number, instance: number) {
-    const { page, context } = await BrowserManager.createPage();
+    // 1. Adquire o contexto do Pool (respeita o limite de 5)
+    const context = await this.pool.acquire();
+    // 2. Cria a página dentro desse contexto
+    const page = await BrowserManager.createPageInContext(context);
+
     try {
       if (!page || !context) {
         this.logger.error('❌ Falha ao criar o contexto ou a página.');
@@ -596,7 +600,12 @@ export class ScrapingService {
 
       return { data: extractedData, multipleInstances };
     } finally {
-      await BrowserManager.closeContext(context);
+      // 3. O PULO DO GATO: Fechar a página antes de liberar o contexto
+      if (page) await page.close().catch(() => {});
+
+      // 4. Libera o contexto para o próximo job da fila
+      this.pool.release(context);
+      this.logger.log('✅ Contexto liberado e aba fechada');
     }
   }
   private async detectBlock(page: Page): Promise<void> {
