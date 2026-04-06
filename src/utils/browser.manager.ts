@@ -23,11 +23,10 @@ export class BrowserManager {
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage', // Crítico para Railway/Docker
+          '--disable-dev-shm-usage',
           '--disable-gpu',
           '--no-zygote',
-          '--single-process', // Ajuda a economizar RAM em ambientes limitados
-          '--disable-extensions',
+          '--disable-software-rasterizer',
         ],
         // args: [
         //   '--no-sandbox',
@@ -76,7 +75,7 @@ export class BrowserManager {
 
     await page.setRequestInterception(true);
     page.on('request', (req) => {
-      const blocked = ['image', 'font', 'media'];
+      const blocked = ['image', 'font', 'media', 'stylesheet'];
       if (blocked.includes(req.resourceType())) {
         req.abort().catch(() => {});
       } else {
