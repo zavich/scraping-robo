@@ -13,6 +13,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://robo-api-production.up.railway.app',
+      'https://robo-api-staging.up.railway.app',
       'http://localhost:8080',
     ],
     credentials: true,
